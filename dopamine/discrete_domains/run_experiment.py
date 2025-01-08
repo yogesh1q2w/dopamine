@@ -263,7 +263,7 @@ class Runner(object):
         if callable(set_collector_dispatcher_fn):
             set_collector_dispatcher_fn(self._collector_dispatcher)
 
-        self.STEP_TIME, self.STEP_COUNT = 0, 0
+        self.TIME_STEP = 0
 
     @property
     def _use_legacy_logger(self):
@@ -351,8 +351,7 @@ class Runner(object):
         """
         time_start = time.time()
         observation, reward, is_terminal, _ = self._environment.step(action)
-        self.STEP_TIME += time.time() - time_start
-        self.STEP_COUNT += 1
+        self.TIME_STEP += time.time() - time_start
         return observation, reward, is_terminal
 
     def _end_episode(self, reward, terminal=True):
@@ -505,36 +504,29 @@ class Runner(object):
         """
         # Perform the training phase, during which the agent learns.
         self._agent.eval_mode = False
-        start_time = time.time()
+        time_begin_epoch = time.time()
         number_steps, sum_returns, num_episodes = self._run_one_phase(self._training_steps, statistics, "train")
-        time_delta = time.time() - start_time
+        TIME_EPOCH = time.time() - time_begin_epoch
         average_return = sum_returns / num_episodes if num_episodes > 0 else 0.0
         statistics.append({"train_average_return": average_return})
-        average_steps_per_second = number_steps / time_delta
+        average_steps_per_second = number_steps / TIME_EPOCH
         statistics.append({"train_average_steps_per_second": average_steps_per_second})
-        logging.info(f"Total time for the epoch: {time_delta} s")
         logging.info(
-            f"{self._agent.ADD_COUNT} add() took {self._agent.ADD_TIME} s, Avg = {'NaN' if self._agent.ADD_COUNT == 0 else self._agent.ADD_TIME/self._agent.ADD_COUNT}"
-        )
-        logging.info(
-            f"{self._agent.SAMPLE_COUNT} sample() took {self._agent.SAMPLE_TIME} s, Avg = {'NaN' if self._agent.SAMPLE_COUNT == 0 else self._agent.SAMPLE_TIME/self._agent.SAMPLE_COUNT}"
-        )
-        logging.info(
-            f"{self.STEP_COUNT} step() took {self.STEP_TIME} s, Avg = {'NaN' if self.STEP_COUNT == 0 else self.STEP_TIME/self.STEP_COUNT}"
-        )
-        logging.info(
-            f"{self._agent.UPDATE_COUNT} grad() took {self._agent.UPDATE_TIME} s, Avg = {'NaN' if self._agent.UPDATE_COUNT == 0 else self._agent.UPDATE_TIME/self._agent.UPDATE_COUNT}"
-        )
-        logging.info(
-            f"{self._agent.ACTION_SELECT_COUNT} select_action() took {self._agent.ACTION_SELECT_TIME} s, Avg = {'NaN' if self._agent.ACTION_SELECT_COUNT == 0 else self._agent.ACTION_SELECT_TIME/self._agent.ACTION_SELECT_COUNT}"
+            f"Total time for the epoch: {TIME_EPOCH} s\n"
+            + f"add() took {self._agent.TIME_ADD} s\n"
+            + f"sample() took {self._agent.TIME_SAMPLE} s\n"
+            + f"step() took {self.TIME_STEP} s\n"
+            + f"grad() took {self._agent.TIME_GRAD} s\n"
+            + f"select_action() took {self._agent.TIME_ACTION_SELECTION} s\n"
+            + f"remaining operations took {TIME_EPOCH - self._agent.TIME_ACTION_SELECTION - self.TIME_STEP - self._agent.TIME_ADD - self._agent.TIME_SAMPLE - self._agent.TIME_GRAD}\n"
         )
         logging.info("Average undiscounted return per training episode: %.2f", average_return)
         logging.info("Average training steps per second: %.2f", average_steps_per_second)
-        self._agent.ADD_COUNT, self._agent.SAMPLE_COUNT = 0, 0
-        self._agent.ADD_TIME, self._agent.SAMPLE_TIME = 0, 0
-        self._agent.UPDATE_COUNT, self._agent.UPDATE_TIME = 0, 0
-        self._agent.ACTION_SELECT_COUNT, self._agent.ACTION_SELECT_TIME = 0, 0
-        self.STEP_COUNT, self.STEP_TIME = 0, 0
+        self._agent.TIME_SAMPLE = 0
+        self._agent.TIME_ADD = 0
+        self._agent.TIME_GRAD = 0
+        self._agent.TIME_ACTION_SELECTION = 0
+        self.TIME_STEP = 0
 
         return num_episodes, average_return, average_steps_per_second
 

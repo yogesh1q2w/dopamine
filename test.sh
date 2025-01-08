@@ -1,5 +1,5 @@
 #!/bin/bash
-LOG_FILE="dopamine_wo_warmupsteps_actionselect_wotf"
+LOG_FILE="dopamine_dqn"
 
 echo "launch train dqn-dopamine"
 source env/bin/activate

@@ -386,12 +386,10 @@ class JaxDQNAgent(object):
         self._observation = None
         self._last_observation = None
 
-        self.ADD_COUNT = 0
-        self.ADD_TIME = 0
-        self.SAMPLE_COUNT = 0
-        self.SAMPLE_TIME = 0
-        self.UPDATE_TIME, self.UPDATE_COUNT = 0, 0
-        self.ACTION_SELECT_TIME, self.ACTION_SELECT_COUNT = 0, 0
+        self.TIME_ADD = 0
+        self.TIME_SAMPLE = 0
+        self.TIME_GRAD = 0
+        self.TIME_ACTION_SELECTION = 0
 
     def _build_networks_and_optimizer(self):
         self._rng, rng = jax.random.split(self._rng)
@@ -417,10 +415,10 @@ class JaxDQNAgent(object):
     def _sample_from_replay_buffer(self):
         """Sample elements from the replay buffer."""
         self.replay_elements = collections.OrderedDict()
-        start_time = time.time()
+        time_begin_sample = time.time()
         elems, metadata = self._replay.sample(with_sample_metadata=True)
-        self.SAMPLE_TIME += time.time() - start_time
-        self.SAMPLE_COUNT += 1
+        jax.block_until_ready(elems)
+        self.TIME_SAMPLE += time.time() - time_begin_sample
         self.replay_elements["state"] = elems.state
         self.replay_elements["next_state"] = elems.next_state
         self.replay_elements["action"] = elems.action
@@ -469,7 +467,7 @@ class JaxDQNAgent(object):
         if not self.eval_mode:
             self._train_step()
 
-        t_s = time.time()
+        time_begin_action_selection = time.time()
         self._rng, self.action = select_action(
             self.network_def,
             self.online_params,
@@ -484,8 +482,8 @@ class JaxDQNAgent(object):
             self.min_replay_history,
             self.epsilon_fn,
         )
-        self.ACTION_SELECT_TIME += time.time() - t_s
-        self.ACTION_SELECT_COUNT += 1
+        jax.block_until_ready(self.action)
+        self.TIME_ACTION_SELECTION += time.time() - time_begin_action_selection
 
         self.action = onp.asarray(self.action)
         return self.action
@@ -510,7 +508,7 @@ class JaxDQNAgent(object):
             self._store_transition(self._last_observation, self.action, reward, False)
             self._train_step()
 
-        t_s = time.time()
+        time_begin_action_selection = time.time()
         self._rng, self.action = select_action(
             self.network_def,
             self.online_params,
@@ -525,8 +523,8 @@ class JaxDQNAgent(object):
             self.min_replay_history,
             self.epsilon_fn,
         )
-        self.ACTION_SELECT_TIME += time.time() - t_s
-        self.ACTION_SELECT_COUNT += 1
+        jax.block_until_ready(self.action)
+        self.TIME_ACTION_SELECTION += time.time() - time_begin_action_selection
         self.action = onp.asarray(self.action)
         return self.action
 
@@ -565,7 +563,7 @@ class JaxDQNAgent(object):
                 self._sample_from_replay_buffer()
                 states = self.preprocess_fn(self.replay_elements["state"])
                 next_states = self.preprocess_fn(self.replay_elements["next_state"])
-                start_time = time.time()
+                time_begin_grad = time.time()
                 self.optimizer_state, self.online_params, loss = train(
                     self.network_def,
                     self.online_params,
@@ -580,8 +578,8 @@ class JaxDQNAgent(object):
                     self.cumulative_gamma,
                     self._loss_type,
                 )
-                self.UPDATE_TIME += time.time() - start_time
-                self.UPDATE_COUNT += 1
+                jax.block_until_ready(loss)
+                self.TIME_GRAD += time.time() - time_begin_grad
                 if (
                     self.summary_writer is not None
                     and self.training_steps > 0
@@ -638,7 +636,7 @@ class JaxDQNAgent(object):
         # pylint: enable=protected-access
 
         if not self.eval_mode:
-            start_time = time.time()
+            time_begin_add = time.time()
             self._replay.add(
                 elements.TransitionElement(
                     last_observation,
@@ -650,8 +648,7 @@ class JaxDQNAgent(object):
                 priority=priority,
                 *args,
             )
-            self.ADD_TIME += time.time() - start_time
-            self.ADD_COUNT += 1
+            self.TIME_ADD += time.time() - time_begin_add
 
     def bundle_and_checkpoint(self, checkpoint_dir, iteration_number):
         """Returns a self-contained bundle of the agent's state.
