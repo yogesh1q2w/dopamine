@@ -486,7 +486,7 @@ class JaxDQNAgent(object):
         )
         self.ACTION_SELECT_TIME += time.time() - t_s
         self.ACTION_SELECT_COUNT += 1
-        
+
         self.action = onp.asarray(self.action)
         return self.action
 

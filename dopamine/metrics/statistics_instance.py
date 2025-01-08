@@ -20,9 +20,9 @@ from typing import Any
 
 @dataclasses.dataclass
 class StatisticsInstance:
-  """Statistics to be passed to each of the collectors."""
+    """Statistics to be passed to each of the collectors."""
 
-  name: str
-  value: Any
-  step: int
-  type: str = 'scalar'
+    name: str
+    value: Any
+    step: int
+    type: str = "scalar"

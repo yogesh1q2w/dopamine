@@ -49,9 +49,9 @@ from dopamine.metrics import tensorboard_collector
 import gin
 
 AVAILABLE_COLLECTORS = {
-    'console': console_collector.ConsoleCollector,
-    'pickle': pickle_collector.PickleCollector,
-    'tensorboard': tensorboard_collector.TensorboardCollector,
+    "console": console_collector.ConsoleCollector,
+    "pickle": pickle_collector.PickleCollector,
+    "tensorboard": tensorboard_collector.TensorboardCollector,
 }
 
 
@@ -59,50 +59,50 @@ CollectorConstructorType = Callable[[str], collector.Collector]
 
 
 def add_collector(name: str, constructor: CollectorConstructorType) -> None:
-  AVAILABLE_COLLECTORS.update({name: constructor})
+    AVAILABLE_COLLECTORS.update({name: constructor})
 
 
 @gin.configurable
 class CollectorDispatcher(object):
-  """Class for collecting and reporting Dopamine metrics."""
+    """Class for collecting and reporting Dopamine metrics."""
 
-  def __init__(
-      self,
-      base_dir: Optional[str],
-      # TODO(psc): Consider using sets instead.
-      collectors: Sequence[str] = ('console', 'pickle', 'tensorboard'),
-  ):
-    self._collectors = []
-    for c in collectors:
-      if c not in AVAILABLE_COLLECTORS:
-        logging.warning('Collector %s not recognized, ignoring.', c)
-        continue
-      self._collectors.append(AVAILABLE_COLLECTORS[c](base_dir))
-      logging.info('Added collector %s.', c)
+    def __init__(
+        self,
+        base_dir: Optional[str],
+        # TODO(psc): Consider using sets instead.
+        collectors: Sequence[str] = ("console", "pickle", "tensorboard"),
+    ):
+        self._collectors = []
+        for c in collectors:
+            if c not in AVAILABLE_COLLECTORS:
+                logging.warning("Collector %s not recognized, ignoring.", c)
+                continue
+            self._collectors.append(AVAILABLE_COLLECTORS[c](base_dir))
+            logging.info("Added collector %s.", c)
 
-  def write(
-      self,
-      statistics: Sequence[statistics_instance.StatisticsInstance],
-      collector_allowlist: Sequence[str] = (),
-  ) -> None:
-    """Write a list of statistics to various collectors.
+    def write(
+        self,
+        statistics: Sequence[statistics_instance.StatisticsInstance],
+        collector_allowlist: Sequence[str] = (),
+    ) -> None:
+        """Write a list of statistics to various collectors.
 
-    Args:
-      statistics: A list of of StatisticsInstances to write.
-      collector_allowlist: A list of Collectors to include in this call to
-        write. This is to enable users to, for instance, which Collectors will
-        be used to write fine-grained statistics. If collector_allowlist is
-        empty, all available Collectors will be called.
-    """
-    for c in self._collectors:
-      if collector_allowlist and c.get_name() not in collector_allowlist:
-        continue
-      c.write(statistics)
+        Args:
+          statistics: A list of of StatisticsInstances to write.
+          collector_allowlist: A list of Collectors to include in this call to
+            write. This is to enable users to, for instance, which Collectors will
+            be used to write fine-grained statistics. If collector_allowlist is
+            empty, all available Collectors will be called.
+        """
+        for c in self._collectors:
+            if collector_allowlist and c.get_name() not in collector_allowlist:
+                continue
+            c.write(statistics)
 
-  def flush(self) -> None:
-    for c in self._collectors:
-      c.flush()
+    def flush(self) -> None:
+        for c in self._collectors:
+            c.flush()
 
-  def close(self) -> None:
-    for c in self._collectors:
-      c.close()
+    def close(self) -> None:
+        for c in self._collectors:
+            c.close()

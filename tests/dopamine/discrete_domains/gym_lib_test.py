@@ -20,40 +20,38 @@ from dopamine.discrete_domains import gym_lib
 
 
 class MockGymEnvironment(object):
-  """Mock environment for testing with Gym/Gymnasium."""
+    """Mock environment for testing with Gym/Gymnasium."""
 
-  def __init__(self, legacy_gym_api):
-    self._legacy_gym_api = legacy_gym_api
-    self.observation_space = 'observation_space'
-    self.action_space = 'action_space'
-    self.reward_range = 'reward_range'
-    self.metadata = 'metadata'
+    def __init__(self, legacy_gym_api):
+        self._legacy_gym_api = legacy_gym_api
+        self.observation_space = "observation_space"
+        self.action_space = "action_space"
+        self.reward_range = "reward_range"
+        self.metadata = "metadata"
 
-  def reset(self):
-    if self._legacy_gym_api:
-      return 'reset'
-    return 'reset', 'info'
+    def reset(self):
+        if self._legacy_gym_api:
+            return "reset"
+        return "reset", "info"
 
-  def step(self, unused_action):
-    if self._legacy_gym_api:
-      return 'obs', 'rew', False, {}
-    return 'obs', 'rew', False, False, {}
+    def step(self, unused_action):
+        if self._legacy_gym_api:
+            return "obs", "rew", False, {}
+        return "obs", "rew", False, False, {}
 
 
 class GymPreprocessingTest(parameterized.TestCase):
 
-  @parameterized.parameters(True, False)
-  def testAll(self, use_legacy_gym):
-    env = gym_lib.GymPreprocessing(
-        MockGymEnvironment(use_legacy_gym), use_legacy_gym=use_legacy_gym
-    )
-    self.assertEqual('observation_space', env.observation_space)
-    self.assertEqual('action_space', env.action_space)
-    self.assertEqual('reward_range', env.reward_range)
-    self.assertEqual('metadata', env.metadata)
-    self.assertEqual('reset', env.reset())
-    self.assertCountEqual(['obs', 'rew', False, {}], env.step(0))
+    @parameterized.parameters(True, False)
+    def testAll(self, use_legacy_gym):
+        env = gym_lib.GymPreprocessing(MockGymEnvironment(use_legacy_gym), use_legacy_gym=use_legacy_gym)
+        self.assertEqual("observation_space", env.observation_space)
+        self.assertEqual("action_space", env.action_space)
+        self.assertEqual("reward_range", env.reward_range)
+        self.assertEqual("metadata", env.metadata)
+        self.assertEqual("reset", env.reset())
+        self.assertCountEqual(["obs", "rew", False, {}], env.step(0))
 
 
-if __name__ == '__main__':
-  absltest.main()
+if __name__ == "__main__":
+    absltest.main()

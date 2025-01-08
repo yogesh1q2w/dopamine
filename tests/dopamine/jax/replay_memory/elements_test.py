@@ -25,38 +25,38 @@ mock = absltest.mock
 
 class ElementsTest(parameterized.TestCase):
 
-  def test_pack_unpack(self) -> None:
-    """Simple test case that packs and unpacks a replay element."""
-    state = np.zeros((84, 84, 4), dtype=np.uint8)
-    next_state = np.ones((84, 84, 4), dtype=np.uint8)
-    action = 1
-    reward = 1.0
-    episode_end = False
+    def test_pack_unpack(self) -> None:
+        """Simple test case that packs and unpacks a replay element."""
+        state = np.zeros((84, 84, 4), dtype=np.uint8)
+        next_state = np.ones((84, 84, 4), dtype=np.uint8)
+        action = 1
+        reward = 1.0
+        episode_end = False
 
-    element = elements.ReplayElement(
-        state=state,
-        action=action,
-        reward=reward,
-        next_state=next_state,
-        is_terminal=episode_end,
-        episode_end=episode_end,
-    )
+        element = elements.ReplayElement(
+            state=state,
+            action=action,
+            reward=reward,
+            next_state=next_state,
+            is_terminal=episode_end,
+            episode_end=episode_end,
+        )
 
-    packed = element.pack()
-    assert packed.is_compressed
-    assert packed.action == action
-    assert packed.reward == reward
-    assert packed.is_terminal == packed.episode_end == episode_end
+        packed = element.pack()
+        assert packed.is_compressed
+        assert packed.action == action
+        assert packed.reward == reward
+        assert packed.is_terminal == packed.episode_end == episode_end
 
-    unpacked = packed.unpack()
-    assert not unpacked.is_compressed
-    assert unpacked.action == action
-    assert unpacked.reward == reward
-    assert unpacked.is_terminal == unpacked.episode_end == episode_end
+        unpacked = packed.unpack()
+        assert not unpacked.is_compressed
+        assert unpacked.action == action
+        assert unpacked.reward == reward
+        assert unpacked.is_terminal == unpacked.episode_end == episode_end
 
-    np.testing.assert_array_equal(unpacked.state, state)
-    np.testing.assert_array_equal(unpacked.next_state, next_state)
+        np.testing.assert_array_equal(unpacked.state, state)
+        np.testing.assert_array_equal(unpacked.next_state, next_state)
 
 
-if __name__ == '__main__':
-  absltest.main()
+if __name__ == "__main__":
+    absltest.main()

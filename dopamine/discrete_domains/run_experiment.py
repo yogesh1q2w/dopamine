@@ -35,6 +35,7 @@ from dopamine.jax.agents.quantile import quantile_agent as jax_quantile_agent
 from dopamine.jax.agents.rainbow import rainbow_agent as jax_rainbow_agent
 from dopamine.metrics import collector_dispatcher
 from dopamine.metrics import statistics_instance
+
 # from dopamine.tf.agents.dqn import dqn_agent
 # from dopamine.tf.agents.implicit_quantile import implicit_quantile_agent
 # from dopamine.tf.agents.rainbow import rainbow_agent

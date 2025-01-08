@@ -26,32 +26,30 @@ import tensorflow as tf
 
 
 class PickleCollector(collector.Collector):
-  """Collector class for reporting statistics to the console."""
+    """Collector class for reporting statistics to the console."""
 
-  def __init__(self, base_dir: str):
-    if base_dir is None:
-      raise ValueError('Must specify a base directory for PickleCollector.')
-    super().__init__(base_dir)
-    listdict = functools.partial(collections.defaultdict, list)
-    self._statistics = collections.defaultdict(listdict)
-    self._file_number = 0
+    def __init__(self, base_dir: str):
+        if base_dir is None:
+            raise ValueError("Must specify a base directory for PickleCollector.")
+        super().__init__(base_dir)
+        listdict = functools.partial(collections.defaultdict, list)
+        self._statistics = collections.defaultdict(listdict)
+        self._file_number = 0
 
-  def get_name(self) -> str:
-    return 'pickle'
+    def get_name(self) -> str:
+        return "pickle"
 
-  def write(
-      self, statistics: Sequence[statistics_instance.StatisticsInstance]
-  ) -> None:
-    # This Collector is trying to write metrics as close as possible to what
-    # is currently written by the Dopamine Logger, so as to be as compatible
-    # with user's plotting setups.
-    for s in statistics:
-      if not self.check_type(s.type):
-        continue
-      self._statistics[f'iteration_{s.step}'][s.name].append(s.value)
+    def write(self, statistics: Sequence[statistics_instance.StatisticsInstance]) -> None:
+        # This Collector is trying to write metrics as close as possible to what
+        # is currently written by the Dopamine Logger, so as to be as compatible
+        # with user's plotting setups.
+        for s in statistics:
+            if not self.check_type(s.type):
+                continue
+            self._statistics[f"iteration_{s.step}"][s.name].append(s.value)
 
-  def flush(self):
-    pickle_file = osp.join(self._base_dir, f'pickle_{self._file_number}.pkl')
-    with tf.io.gfile.GFile(pickle_file, 'w') as f:
-      pickle.dump(self._statistics, f, protocol=pickle.HIGHEST_PROTOCOL)
-    self._file_number += 1
+    def flush(self):
+        pickle_file = osp.join(self._base_dir, f"pickle_{self._file_number}.pkl")
+        with tf.io.gfile.GFile(pickle_file, "w") as f:
+            pickle.dump(self._statistics, f, protocol=pickle.HIGHEST_PROTOCOL)
+        self._file_number += 1

@@ -21,27 +21,23 @@ import tensorflow as tf
 
 
 class TensorboardCollector(collector.Collector):
-  """Collector class for reporting statistics on Tensorboard."""
+    """Collector class for reporting statistics on Tensorboard."""
 
-  def __init__(self, base_dir: str):
-    if not isinstance(base_dir, str):
-      raise ValueError(
-          'Must specify a base directory for TensorboardCollector.'
-      )
-    super().__init__(base_dir)
-    self.summary_writer = tf.summary.create_file_writer(self._base_dir)
+    def __init__(self, base_dir: str):
+        if not isinstance(base_dir, str):
+            raise ValueError("Must specify a base directory for TensorboardCollector.")
+        super().__init__(base_dir)
+        self.summary_writer = tf.summary.create_file_writer(self._base_dir)
 
-  def get_name(self) -> str:
-    return 'tensorboard'
+    def get_name(self) -> str:
+        return "tensorboard"
 
-  def write(
-      self, statistics: Sequence[statistics_instance.StatisticsInstance]
-  ) -> None:
-    with self.summary_writer.as_default():
-      for s in statistics:
-        if not self.check_type(s.type):
-          continue
-        tf.summary.scalar(s.name, s.value, step=s.step)
+    def write(self, statistics: Sequence[statistics_instance.StatisticsInstance]) -> None:
+        with self.summary_writer.as_default():
+            for s in statistics:
+                if not self.check_type(s.type):
+                    continue
+                tf.summary.scalar(s.name, s.value, step=s.step)
 
-  def flush(self):
-    self.summary_writer.flush()
+    def flush(self):
+        self.summary_writer.flush()

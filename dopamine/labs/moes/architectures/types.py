@@ -20,108 +20,100 @@ import jax
 
 @dataclasses.dataclass
 class RouterReturn:
-  output: jax.Array
-  probabilities: jax.Array
-  top_expert_weights: jax.Array
-  top_experts: jax.Array
+    output: jax.Array
+    probabilities: jax.Array
+    top_expert_weights: jax.Array
+    top_experts: jax.Array
 
 
 def router_flatten(v):
-  """Flattening recipe for RouterReturn."""
-  children = (v.output, v.probabilities, v.top_expert_weights, v.top_experts)
-  aux_data = None
-  return (children, aux_data)
+    """Flattening recipe for RouterReturn."""
+    children = (v.output, v.probabilities, v.top_expert_weights, v.top_experts)
+    aux_data = None
+    return (children, aux_data)
 
 
 def router_unflatten(aux_data, children):
-  """Unflattening recipe for RouterReturn."""
-  del aux_data
-  return RouterReturn(*children)
+    """Unflattening recipe for RouterReturn."""
+    del aux_data
+    return RouterReturn(*children)
 
 
-jax.tree_util.register_pytree_node(
-    RouterReturn, router_flatten, router_unflatten
-)
+jax.tree_util.register_pytree_node(RouterReturn, router_flatten, router_unflatten)
 
 
 @dataclasses.dataclass
 class MoEModuleReturn:
-  values: jax.Array
-  router_out: RouterReturn
-  experts_hidden: 'jax.Array | None' = None
+    values: jax.Array
+    router_out: RouterReturn
+    experts_hidden: "jax.Array | None" = None
 
 
 def module_flatten(v):
-  """Flattening recipe for MoEModuleReturn."""
-  children = (v.values, v.router_out, v.experts_hidden)
-  aux_data = None
-  return (children, aux_data)
+    """Flattening recipe for MoEModuleReturn."""
+    children = (v.values, v.router_out, v.experts_hidden)
+    aux_data = None
+    return (children, aux_data)
 
 
 def module_unflatten(aux_data, children):
-  """Unflattening recipe for MoEModuleReturn."""
-  del aux_data
-  return MoEModuleReturn(*children)
+    """Unflattening recipe for MoEModuleReturn."""
+    del aux_data
+    return MoEModuleReturn(*children)
 
 
-jax.tree_util.register_pytree_node(
-    MoEModuleReturn, module_flatten, module_unflatten
-)
+jax.tree_util.register_pytree_node(MoEModuleReturn, module_flatten, module_unflatten)
 
 
 @dataclasses.dataclass
 class MoENetworkReturn:
-  q_values: jax.Array
-  moe_out: MoEModuleReturn
-  logits: 'jax.Array | None' = None
-  probabilities: 'jax.Array | None' = None
-  hidden_act: 'jax.Array | None' = None
+    q_values: jax.Array
+    moe_out: MoEModuleReturn
+    logits: "jax.Array | None" = None
+    probabilities: "jax.Array | None" = None
+    hidden_act: "jax.Array | None" = None
 
 
 def network_flatten(v):
-  """Flattening recipe for MoENetworkReturn."""
-  children = (v.q_values, v.moe_out, v.logits, v.probabilities, v.hidden_act)
-  aux_data = None
-  return (children, aux_data)
+    """Flattening recipe for MoENetworkReturn."""
+    children = (v.q_values, v.moe_out, v.logits, v.probabilities, v.hidden_act)
+    aux_data = None
+    return (children, aux_data)
 
 
 def network_unflatten(aux_data, children):
-  """Unflattening recipe for MoENetworkReturn."""
-  del aux_data
-  return MoENetworkReturn(*children)
+    """Unflattening recipe for MoENetworkReturn."""
+    del aux_data
+    return MoENetworkReturn(*children)
 
 
-jax.tree_util.register_pytree_node(
-    MoENetworkReturn, network_flatten, network_unflatten
-)
+jax.tree_util.register_pytree_node(MoENetworkReturn, network_flatten, network_unflatten)
 
 
 @dataclasses.dataclass
 class BaselineNetworkReturn:
-  q_values: jax.Array
-  hidden_act: jax.Array
-  logits: 'jax.Array | None' = None
-  probabilities: 'jax.Array | None' = None
+    q_values: jax.Array
+    hidden_act: jax.Array
+    logits: "jax.Array | None" = None
+    probabilities: "jax.Array | None" = None
 
 
 def baseline_network_flatten(v):
-  """Flattening recipe for BaselineNetworkReturn."""
-  children = (v.q_values, v.hidden_act, v.logits, v.probabilities)
-  aux_data = None
-  return (children, aux_data)
+    """Flattening recipe for BaselineNetworkReturn."""
+    children = (v.q_values, v.hidden_act, v.logits, v.probabilities)
+    aux_data = None
+    return (children, aux_data)
 
 
 def baseline_network_unflatten(aux_data, children):
-  """Unflattening recipe for BaselineNetworkReturn."""
-  del aux_data
-  return BaselineNetworkReturn(*children)
+    """Unflattening recipe for BaselineNetworkReturn."""
+    del aux_data
+    return BaselineNetworkReturn(*children)
 
 
-jax.tree_util.register_pytree_node(
-    BaselineNetworkReturn, baseline_network_flatten, baseline_network_unflatten
-)
+jax.tree_util.register_pytree_node(BaselineNetworkReturn, baseline_network_flatten, baseline_network_unflatten)
 
 
 # pylint: disable=invalid-name
-NetworkReturn = 'MoENetworkReturn | BaselineNetworkReturn'
+NetworkReturn = "MoENetworkReturn | BaselineNetworkReturn"
 # pylint: enable=invalid-name

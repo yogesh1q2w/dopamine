@@ -24,35 +24,33 @@ import gin
 import tensorflow as tf
 
 
-@gin.configurable(allowlist=['save_to_file'])
+@gin.configurable(allowlist=["save_to_file"])
 class ConsoleCollector(collector.Collector):
-  """Collector class for reporting statistics to the console."""
+    """Collector class for reporting statistics to the console."""
 
-  def __init__(self, base_dir: Union[str, None], save_to_file: bool = True):
-    super().__init__(base_dir)
-    if self._base_dir is not None and save_to_file:
-      self._log_file = osp.join(self._base_dir, 'console.log')
-      self._log_file_writer = tf.io.gfile.GFile(self._log_file, 'w')
-    else:
-      self._log_file = None
+    def __init__(self, base_dir: Union[str, None], save_to_file: bool = True):
+        super().__init__(base_dir)
+        if self._base_dir is not None and save_to_file:
+            self._log_file = osp.join(self._base_dir, "console.log")
+            self._log_file_writer = tf.io.gfile.GFile(self._log_file, "w")
+        else:
+            self._log_file = None
 
-  def get_name(self) -> str:
-    return 'console'
+    def get_name(self) -> str:
+        return "console"
 
-  def write(
-      self, statistics: Sequence[statistics_instance.StatisticsInstance]
-  ) -> None:
-    step_string = ''
-    for s in statistics:
-      if not self.check_type(s.type):
-        continue
-      step_string += f'[Iteration {s.step}]: {s.name} = {s.value}\n'
-    # Only write out if step_string is non-empty
-    if step_string:
-      logging.info(step_string)
-      if self._log_file is not None:
-        self._log_file_writer.write(step_string)
+    def write(self, statistics: Sequence[statistics_instance.StatisticsInstance]) -> None:
+        step_string = ""
+        for s in statistics:
+            if not self.check_type(s.type):
+                continue
+            step_string += f"[Iteration {s.step}]: {s.name} = {s.value}\n"
+        # Only write out if step_string is non-empty
+        if step_string:
+            logging.info(step_string)
+            if self._log_file is not None:
+                self._log_file_writer.write(step_string)
 
-  def close(self) -> None:
-    if self._log_file is not None:
-      self._log_file_writer.close()  # pytype: disable=attribute-error  # trace-all-classes
+    def close(self) -> None:
+        if self._log_file is not None:
+            self._log_file_writer.close()  # pytype: disable=attribute-error  # trace-all-classes

@@ -22,40 +22,37 @@ from absl import logging
 
 from dopamine.continuous_domains import run_experiment
 
-flags.DEFINE_string(
-    'base_dir', None, 'Base directory to host all required sub-directories.'
+flags.DEFINE_string("base_dir", None, "Base directory to host all required sub-directories.")
+flags.DEFINE_multi_string(
+    "gin_files",
+    [],
+    "List of paths to gin configuration files (e.g." '"dopamine/jax/agents/sac/configs/sac.gin").',
 )
 flags.DEFINE_multi_string(
-    'gin_files',
+    "gin_bindings",
     [],
-    'List of paths to gin configuration files (e.g.'
-    '"dopamine/jax/agents/sac/configs/sac.gin").',
-)
-flags.DEFINE_multi_string(
-    'gin_bindings',
-    [],
-    'Gin bindings to override the values set in the config files.',
+    "Gin bindings to override the values set in the config files.",
 )
 
 FLAGS = flags.FLAGS
 
 
 def main(unused_argv):
-  """Main method.
+    """Main method.
 
-  Args:
-    unused_argv: Arguments (unused).
-  """
-  logging.set_verbosity(logging.INFO)
-  base_dir = FLAGS.base_dir
-  gin_files = FLAGS.gin_files
-  gin_bindings = FLAGS.gin_bindings
+    Args:
+      unused_argv: Arguments (unused).
+    """
+    logging.set_verbosity(logging.INFO)
+    base_dir = FLAGS.base_dir
+    gin_files = FLAGS.gin_files
+    gin_bindings = FLAGS.gin_bindings
 
-  run_experiment.load_gin_configs(gin_files, gin_bindings)
-  runner = run_experiment.create_continuous_runner(base_dir)
-  runner.run_experiment()
+    run_experiment.load_gin_configs(gin_files, gin_bindings)
+    runner = run_experiment.create_continuous_runner(base_dir)
+    runner.run_experiment()
 
 
-if __name__ == '__main__':
-  flags.mark_flag_as_required('base_dir')
-  app.run(main)
+if __name__ == "__main__":
+    flags.mark_flag_as_required("base_dir")
+    app.run(main)

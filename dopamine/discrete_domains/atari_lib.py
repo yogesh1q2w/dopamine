@@ -45,10 +45,12 @@ import ale_py
 from baselines.common import atari_wrappers
 import cv2
 import gin
+
 # import gym as legacy_gym
 import gymnasium as gym
 from gymnasium.spaces.box import Box
 import numpy as np
+
 # import tensorflow as tf
 
 
@@ -129,10 +131,10 @@ def create_atari_environment(
     #     env = env.env  # Strip the TimeLimit wrapper
     #     env = GameOverWrapper(env)
     # else:
-        # Strip out the TimeLimit wrapper from Gym, which caps us at 100k frames. We
-        # handle this time limit internally instead, which lets us cap at 108k
-        # frames (30 minutes). The TimeLimit wrapper also plays poorly with saving
-        # and restoring states.
+    # Strip out the TimeLimit wrapper from Gym, which caps us at 100k frames. We
+    # handle this time limit internally instead, which lets us cap at 108k
+    # frames (30 minutes). The TimeLimit wrapper also plays poorly with saving
+    # and restoring states.
     env = env.env
     env = AtariPreprocessing(env)
     return env
